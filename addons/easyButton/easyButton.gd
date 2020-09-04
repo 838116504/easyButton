@@ -74,12 +74,12 @@ func _exit_tree():
 
 func _notification(what):
 	if what == NOTIFICATION_THEME_CHANGED:
-		var enable = ControlMethod.has_bool(self, "mask_enable")
-		if (enable && (ControlMethod.get_bool(self, "mask_enable") != (mask != null))) || (!enable && (DEFAULT_MASK_ENABLE != (mask != null))):
+		var enable = ControlMethod.get_bool(self, "mask_enable") if ControlMethod.has_bool(self, "mask_enable") else DEFAULT_MASK_ENABLE
+		if enable != (mask != null):
 			_update_mask()
 		
 		_update_material()
-		
+
 		minimum_size_changed()
 	elif what == NOTIFICATION_RESIZED || what == NOTIFICATION_TRANSFORM_CHANGED:
 		if hoverPivotMode:
