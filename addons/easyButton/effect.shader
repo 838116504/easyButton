@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform float scale = 0.4;
+uniform vec2 scale = vec2(0.8);
 uniform vec2 scalePivot = vec2(0.0);
 uniform bool isMix = false;
 uniform vec4 mixColor : hint_color = vec4(1.0);

@@ -19,7 +19,7 @@ const DEFAULT_MASK_THRESHOLD = 0.1
 const DEFAULT_SOUND_VOLUME = 0.5
 const COLOR_THEME_NAMES = { "hover_mix_color":DEFAULT_MIX_COLOR, "pressed_mix_color":DEFAULT_MIX_COLOR }
 const BOOL_THEME_NAMES = { "mask_enable":DEFAULT_MASK_ENABLE }
-const FLOAT_THEME_NAMES = { "hover_mix":DEFAULT_MIX, "hover_scale":DEFAULT_SCALE, "mask_threshold":DEFAULT_MASK_THRESHOLD, "pressed_mix":DEFAULT_MIX, "pressed_scale":DEFAULT_SCALE, "sound_volume":DEFAULT_SOUND_VOLUME }
+const FLOAT_THEME_NAMES = { "hover_mix":DEFAULT_MIX, "hover_scale_x":DEFAULT_SCALE, "hover_scale_y":DEFAULT_SCALE, "mask_threshold":DEFAULT_MASK_THRESHOLD, "pressed_mix":DEFAULT_MIX, "pressed_scale_x":DEFAULT_SCALE, "pressed_scale_y":DEFAULT_SCALE, "sound_volume":DEFAULT_SOUND_VOLUME }
 const ENUM_THEME_NAMES = { "hover_effect":DEFAULT_HOVER_EFFECT, "hover_scale_pivot":DEFAULT_SCALE_PIVOT, "pressed_effect":DEFAULT_PRESSED_EFFECT, "pressed_scale_pivot":DEFAULT_SCALE_PIVOT }
 const ENUM_THEME_OPTION_DICT = { 
 		"Pivot":["Top left", "Top", "Top right",
@@ -42,9 +42,10 @@ var hoverPressPivotMode2 = null
 enum { FOLLOW_NONE = -1, FOLLOW_PRESSED, FOLLOW_HOVER }
 var followStyle := FOLLOW_NONE
 const FOLLOW_NAMES = [ "pressed", "hover" ]
+const CLASS_NAME = "EasyButton"
 
 func get_class() -> String:
-	return "EasyButton"
+	return CLASS_NAME
 
 func get_parent_class():
 	return Button
@@ -57,14 +58,18 @@ static func get_parent_class_static():
 #		return true
 #	return .is_class(p_class)
 
+func _init():
+	add_child(soundPlayer)
+
 func _enter_tree():
 	connect("mouse_entered", self, "_on_easy_button_mouse_entered")
 	connect("mouse_exited", self, "_on_easy_button_mouse_exited")
 	connect("button_down", self, "_on_easy_button_button_down")
 	connect("button_up", self, "_on_easy_button_button_up")
-	add_child(soundPlayer)
-	_update_mask()
-	_update_material()
+	
+#	_update_mask()
+#	_update_material()
+	set_notify_transform(true)
 
 func _exit_tree():
 	disconnect("mouse_entered", self, "_on_easy_button_mouse_entered")
@@ -72,8 +77,11 @@ func _exit_tree():
 	disconnect("button_down", self, "_on_easy_button_button_down")
 	disconnect("button_up", self, "_on_easy_button_button_up")
 
+#func _get_minimum_size():
+#	return .get_minimum_size()
+
 func _notification(what):
-	if what == NOTIFICATION_THEME_CHANGED:
+	if what == NOTIFICATION_THEME_CHANGED || what == NOTIFICATION_ENTER_TREE:
 		var enable = ControlMethod.get_bool(self, "mask_enable") if ControlMethod.has_bool(self, "mask_enable") else DEFAULT_MASK_ENABLE
 		if enable != (mask != null):
 			_update_mask()
@@ -83,9 +91,9 @@ func _notification(what):
 		minimum_size_changed()
 	elif what == NOTIFICATION_RESIZED || what == NOTIFICATION_TRANSFORM_CHANGED:
 		if hoverPivotMode:
-			hoverMaterial.set_shader_param("scalePivot", rect_position + rect_size / 2.0 * Vector2(hoverPivotMode % 3, hoverPivotMode / 3))
+			hoverMaterial.set_shader_param("scalePivot", rect_size / 2.0 * Vector2(hoverPivotMode % 3, floor(hoverPivotMode / 3)))
 		if pressPivotMode:
-			pressMaterial.set_shader_param("scalePivot", rect_position + rect_size / 2.0 * Vector2(pressPivotMode % 3, pressPivotMode / 3))
+			pressMaterial.set_shader_param("scalePivot", rect_size / 2.0 * Vector2(pressPivotMode % 3, floor(pressPivotMode / 3)))
 
 func _update_mask():
 	var alphaMask = ControlMethod.get_bool(self, "mask_enable") if ControlMethod.has_bool(self, "mask_enable") else DEFAULT_MASK_ENABLE
@@ -260,7 +268,7 @@ func _set_effect(p_themeHead:String, p_material:Array, p_effect:int):
 				p_material[0] = ShaderMaterial.new()
 				p_material[0].shader = EFFECT_SHADER
 			
-			p_material[0].set_shader_param("scale", 1.0)
+			p_material[0].set_shader_param("scale", Vector2(1.0, 1.0))
 			p_material[0].set_shader_param("isMix", true)
 			p_material[0].set_shader_param("mixColor", get_color(p_themeHead + "_mix_color") if has_color(p_themeHead + "_mix_color") else DEFAULT_MIX_COLOR)
 			p_material[0].set_shader_param("mixRatio", ControlMethod.get_float(self, p_themeHead + "_mix") if ControlMethod.has_float(self, p_themeHead + "_mix") else DEFAULT_MIX)
@@ -273,11 +281,13 @@ func _set_effect(p_themeHead:String, p_material:Array, p_effect:int):
 				p_material[0] = ShaderMaterial.new()
 				p_material[0].shader = EFFECT_SHADER
 			
-			p_material[0].set_shader_param("scale", ControlMethod.get_float(self, p_themeHead + "_scale") if ControlMethod.has_float(self, p_themeHead + "_scale") else DEFAULT_SCALE)
+			p_material[0].set_shader_param("scale", 
+					Vector2(ControlMethod.get_float(self, p_themeHead + "_scale_x") if ControlMethod.has_float(self, p_themeHead + "_scale_x") else DEFAULT_SCALE, 
+					ControlMethod.get_float(self, p_themeHead + "_scale_y") if ControlMethod.has_float(self, p_themeHead + "_scale_y") else DEFAULT_SCALE))
 			var scalePivot = DEFAULT_SCALE_PIVOT
 			if ControlMethod.has_enum(self, p_themeHead + "_scale_pivot"):
 				scalePivot = ControlMethod.get_enum(self, p_themeHead + "_scale_pivot")
-			p_material[0].set_shader_param("scalePivot", rect_position + rect_size / 2.0 * Vector2(scalePivot % 3, scalePivot / 3))
+			p_material[0].set_shader_param("scalePivot", rect_size / 2.0 * Vector2(scalePivot % 3, floor(scalePivot / 3)))
 			p_material[0].set_shader_param("isMix", false)
 			if p_themeHead == "hover":
 				hoverPivotMode = scalePivot
@@ -288,11 +298,13 @@ func _set_effect(p_themeHead:String, p_material:Array, p_effect:int):
 				p_material[0] = ShaderMaterial.new()
 				p_material[0].shader = EFFECT_SHADER
 			
-			p_material[0].set_shader_param("scale", ControlMethod.get_float(self, p_themeHead + "_scale") if ControlMethod.has_float(self, p_themeHead + "_scale") else DEFAULT_SCALE)
+			p_material[0].set_shader_param("scale", 
+					Vector2(ControlMethod.get_float(self, p_themeHead + "_scale_x") if ControlMethod.has_float(self, p_themeHead + "_scale_x") else DEFAULT_SCALE, 
+					ControlMethod.get_float(self, p_themeHead + "_scale_y") if ControlMethod.has_float(self, p_themeHead + "_scale_y") else DEFAULT_SCALE))
 			var scalePivot = DEFAULT_SCALE_PIVOT
 			if ControlMethod.has_enum(self, p_themeHead + "_scale_pivot"):
 				scalePivot = ControlMethod.get_enum(self, p_themeHead + "_scale_pivot")
-			p_material[0].set_shader_param("scalePivot", rect_position + rect_size / 2.0 * Vector2(scalePivot % 3, scalePivot / 3))
+			p_material[0].set_shader_param("scalePivot", rect_size / 2.0 * Vector2(scalePivot % 3, floor(scalePivot / 3)))
 			
 			p_material[0].set_shader_param("isMix", true)
 			p_material[0].set_shader_param("mixColor", get_color(p_themeHead + "_mix_color") if has_color(p_themeHead + "_mix_color") else DEFAULT_MIX_COLOR)
@@ -354,7 +366,6 @@ func _update_draw_mode():
 			material = null
 		_:
 			material = null
-	pass
 
 func _on_easy_button_mouse_entered():
 	var sound = ControlMethod.get_sound(self, "mouse_enter_sound")
@@ -428,6 +439,28 @@ func _set(p_property, p_value):
 			add_color_override(splitArray[1], p_value)
 		else:
 			add_color_override(splitArray[1], COLOR_THEME_NAMES[splitArray[1]])
+	elif splitArray[1] == "hover_scale":
+		if ControlMethod.has_float_override(self, "hover_scale_x") || ControlMethod.has_float_override(self, "hover_scale_y") || p_value != null:
+			if p_value == null:
+				ControlMethod.add_float_override(self, "hover_scale_x", null)
+				ControlMethod.add_float_override(self, "hover_scale_y", null)
+			elif p_value is Vector2:
+				ControlMethod.add_float_override(self, "hover_scale_x", p_value.x)
+				ControlMethod.add_float_override(self, "hover_scale_y", p_value.y)
+		else:
+			ControlMethod.add_float_override(self, "hover_scale_x", DEFAULT_SCALE)
+			ControlMethod.add_float_override(self, "hover_scale_y", DEFAULT_SCALE)
+	elif splitArray[1] == "pressed_scale":
+		if ControlMethod.has_float_override(self, "pressed_scale_x") || ControlMethod.has_float_override(self, "pressed_scale_y") || p_value != null:
+			if p_value == null:
+				ControlMethod.add_float_override(self, "pressed_scale_x", null)
+				ControlMethod.add_float_override(self, "pressed_scale_y", null)
+			elif p_value is Vector2:
+				ControlMethod.add_float_override(self, "pressed_scale_x", p_value.x)
+				ControlMethod.add_float_override(self, "pressed_scale_y", p_value.y)
+		else:
+			ControlMethod.add_float_override(self, "pressed_scale_x", DEFAULT_SCALE)
+			ControlMethod.add_float_override(self, "pressed_scale_y", DEFAULT_SCALE)
 	else:
 		return false
 	
@@ -487,7 +520,10 @@ func _get_property_list():
 	if not ControlMethod.has_enum_override(self, "hover_effect"):
 		_property_list_add_float(ret, "hover_mix")
 		_property_list_add_color(ret, "hover_mix_color")
-		_property_list_add_float(ret, "hover_scale")
+		if ControlMethod.has_float_override(self, "hover_scale_x") || ControlMethod.has_float_override(self, "hover_scale_y"):
+			ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+		else:
+			ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 		_property_list_add_enum(ret, "hover_scale_pivot")
 	else:
 		var effect = ControlMethod.get_enum(self, "hover_effect")
@@ -495,14 +531,20 @@ func _get_property_list():
 			_property_list_add_float(ret, "hover_mix")
 			_property_list_add_color(ret, "hover_mix_color")
 		if effect == EFFECT_SCALE || effect == EFFECT_MIX_SCALE:
-			_property_list_add_float(ret, "hover_scale")
+			if ControlMethod.has_float_override(self, "hover_scale_x") || ControlMethod.has_float_override(self, "hover_scale_y"):
+				ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+			else:
+				ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 			_property_list_add_enum(ret, "hover_scale_pivot")
 
 	_property_list_add_enum(ret, "pressed_effect")
 	if not ControlMethod.has_enum_override(self, "pressed_effect"):
 		_property_list_add_float(ret, "pressed_mix")
 		_property_list_add_color(ret, "pressed_mix_color")
-		_property_list_add_float(ret, "pressed_scale")
+		if ControlMethod.has_float_override(self, "pressed_scale_x") || ControlMethod.has_float_override(self, "pressed_scale_y"):
+			ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+		else:
+			ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 		_property_list_add_enum(ret, "pressed_scale_pivot")
 	else:
 		var effect = ControlMethod.get_enum(self, "pressed_effect")
@@ -510,7 +552,10 @@ func _get_property_list():
 			_property_list_add_float(ret, "pressed_mix")
 			_property_list_add_color(ret, "pressed_mix_color")
 		if effect == EFFECT_SCALE || effect == EFFECT_MIX_SCALE:
-			_property_list_add_float(ret, "pressed_scale")
+			if ControlMethod.has_float_override(self, "pressed_scale_x") || ControlMethod.has_float_override(self, "pressed_scale_y"):
+				ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+			else:
+				ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 			_property_list_add_enum(ret, "pressed_scale_pivot")
 	return ret
 
@@ -541,18 +586,33 @@ func _property_list_add_color(p_list:Array, p_color:String):
 	else:
 		p_list.append({ "name":get_class() + "/" + p_color, "type":TYPE_COLOR, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
 
-func _register_default_theme(p_theme:MyTheme):
+static func _register_default_theme(p_theme:MyTheme):
 	for i in BOOL_THEME_NAMES.keys():
-		p_theme.set_bool(i, get_class(), BOOL_THEME_NAMES[i])
+		p_theme.set_bool(i, CLASS_NAME, BOOL_THEME_NAMES[i])
 
 	for i in FLOAT_THEME_NAMES.keys():
-		p_theme.set_float(i, get_class(), FLOAT_THEME_NAMES[i])
+		p_theme.set_float(i, CLASS_NAME, FLOAT_THEME_NAMES[i])
 
 	for i in SOUND_THEME_NAMES.keys():
-		p_theme.set_sound(i, get_class(), SOUND_THEME_NAMES[i])
+		p_theme.set_sound(i, CLASS_NAME, SOUND_THEME_NAMES[i])
 
 	for i in ENUM_THEME_NAMES.keys():
-		p_theme.set_enum(i, get_class(), ENUM_THEME_NAMES[i], ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]])
+		p_theme.set_enum(i, CLASS_NAME, ENUM_THEME_NAMES[i], ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]])
 
 	for i in COLOR_THEME_NAMES.keys():
-		p_theme.set_color(i, get_class(), COLOR_THEME_NAMES[i])
+		p_theme.set_color(i, CLASS_NAME, COLOR_THEME_NAMES[i])
+
+
+func has_color(p_name:String, p_type:String = "") -> bool:
+	if p_type == "" && not has_color_override(p_name) && COLOR_THEME_NAMES.has(p_name):
+		p_type = get_class()
+	return .has_color(p_name, p_type)
+
+
+func get_color(p_name:String, p_type:String = ""):
+	if p_type == "" && not has_color_override(p_name) && COLOR_THEME_NAMES.has(p_name):
+		p_type = get_class()
+	return .get_color(p_name, p_type)
+
+
+
