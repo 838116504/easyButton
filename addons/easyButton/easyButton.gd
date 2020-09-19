@@ -44,7 +44,7 @@ var followStyle := FOLLOW_NONE
 const FOLLOW_NAMES = [ "pressed", "hover" ]
 const CLASS_NAME = "EasyButton"
 
-func get_class() -> String:
+func get_class_static() -> String:
 	return CLASS_NAME
 
 func get_parent_class():
@@ -52,11 +52,6 @@ func get_parent_class():
 
 static func get_parent_class_static():
 	return Button
-
-#func is_class(p_class:String) -> bool:
-#	if p_class == get_class():
-#		return true
-#	return .is_class(p_class)
 
 func _init():
 	add_child(soundPlayer)
@@ -67,8 +62,8 @@ func _enter_tree():
 	connect("button_down", self, "_on_easy_button_button_down")
 	connect("button_up", self, "_on_easy_button_button_up")
 	
-#	_update_mask()
-#	_update_material()
+	_update_mask()
+	_update_material()
 	set_notify_transform(true)
 
 func _exit_tree():
@@ -76,9 +71,6 @@ func _exit_tree():
 	disconnect("mouse_exited", self, "_on_easy_button_mouse_exited")
 	disconnect("button_down", self, "_on_easy_button_button_down")
 	disconnect("button_up", self, "_on_easy_button_button_up")
-
-#func _get_minimum_size():
-#	return .get_minimum_size()
 
 func _notification(what):
 	if what == NOTIFICATION_THEME_CHANGED || what == NOTIFICATION_ENTER_TREE:
@@ -259,9 +251,6 @@ func _update_material():
 
 
 func _set_effect(p_themeHead:String, p_material:Array, p_effect:int):
-#	var effect = ControlMethod.get_enum(self, p_themeHead + "_effect") if ControlMethod.has_enum(self, p_themeHead + "_effect") else p_defaultEffect
-#	if effect == EFFECT_FOLLOW:
-#		effect = p_defaultEffect
 	match p_effect:
 		EFFECT_MIX:
 			if !p_material[0]:
@@ -394,7 +383,7 @@ func _on_easy_button_button_up():
 
 func _get(p_property):
 	var splitArray = p_property.split("/", true, 1)
-	if splitArray.size() < 2 || splitArray[0] != get_class():
+	if splitArray.size() < 2 || splitArray[0] != get_class_static():
 		return null
 	
 	if BOOL_THEME_NAMES.has(splitArray[1]):
@@ -411,7 +400,7 @@ func _get(p_property):
 
 func _set(p_property, p_value):
 	var splitArray = p_property.split("/", true, 1)
-	if splitArray.size() < 2 || splitArray[0] != get_class():
+	if splitArray.size() < 2 || splitArray[0] != get_class_static():
 		return false
 	
 	if BOOL_THEME_NAMES.has(splitArray[1]):
@@ -473,46 +462,46 @@ func _get_property_list():
 	
 #	for i in BOOL_THEME_NAMES.keys():
 #		if ControlMethod.has_bool_override(self, i):
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_BOOL, "usage":checkedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_BOOL, "usage":checkedUsage })
 #		else:
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_BOOL, "usage":uncheckedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_BOOL, "usage":uncheckedUsage })
 #
 #	for i in FLOAT_THEME_NAMES.keys():
 #		if ControlMethod.has_float_override(self, i):
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_REAL, "usage":checkedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_REAL, "usage":checkedUsage })
 #		else:
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_REAL, "usage":uncheckedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_REAL, "usage":uncheckedUsage })
 #
 #	for i in SOUND_THEME_NAMES.keys():
 #		if ControlMethod.has_sound_override(self, i):
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":checkedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":checkedUsage })
 #		else:
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":uncheckedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":uncheckedUsage })
 #
 #	for i in ENUM_THEME_NAMES.keys():
 #		if ControlMethod.has_enum_override(self, i):
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]],"usage":checkedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]],"usage":checkedUsage })
 #		else:
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]], "usage":uncheckedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[i]], "usage":uncheckedUsage })
 #
 #	for i in COLOR_THEME_NAMES.keys():
 #		if has_color_override(i):
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_COLOR, "usage":checkedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_COLOR, "usage":checkedUsage })
 #		else:
-#			ret.append({ "name":get_class() + "/" + i, "type":TYPE_COLOR, "usage":uncheckedUsage })
+#			ret.append({ "name":get_class_static() + "/" + i, "type":TYPE_COLOR, "usage":uncheckedUsage })
 
 	_property_list_add_sound(ret, "mouse_enter_sound")
 	_property_list_add_sound(ret, "mouse_exit_sound")
 	_property_list_add_sound(ret, "mouse_press_sound")
 	if ControlMethod.has_float_override(self, "sound_volume"):
-		ret.append({ "name":get_class() + "/sound_volume", "type":TYPE_REAL, "hint":PROPERTY_HINT_RANGE, "hint_string":"0,1","usage":checkedUsage })
+		ret.append({ "name":get_class_static() + "/sound_volume", "type":TYPE_REAL, "hint":PROPERTY_HINT_RANGE, "hint_string":"0,1","usage":checkedUsage })
 	else:
-		ret.append({ "name":get_class() + "/sound_volume", "type":TYPE_REAL, "hint":PROPERTY_HINT_RANGE, "hint_string":"0,1", "usage":uncheckedUsage })
+		ret.append({ "name":get_class_static() + "/sound_volume", "type":TYPE_REAL, "hint":PROPERTY_HINT_RANGE, "hint_string":"0,1", "usage":uncheckedUsage })
 
 	if ControlMethod.has_bool_override(self, "mask_enable"):
-		ret.append({ "name":get_class() + "/mask_enable", "type":TYPE_BOOL, "usage":checkedUsage })
+		ret.append({ "name":get_class_static() + "/mask_enable", "type":TYPE_BOOL, "usage":checkedUsage })
 	else:
-		ret.append({ "name":get_class() + "/mask_enable", "type":TYPE_BOOL, "usage":uncheckedUsage })
+		ret.append({ "name":get_class_static() + "/mask_enable", "type":TYPE_BOOL, "usage":uncheckedUsage })
 	if not ControlMethod.has_bool_override(self, "mask_enable") || ControlMethod.get_bool(self, "mask_enable"):
 		_property_list_add_float(ret, "mask_threshold")
 
@@ -521,9 +510,9 @@ func _get_property_list():
 		_property_list_add_float(ret, "hover_mix")
 		_property_list_add_color(ret, "hover_mix_color")
 		if ControlMethod.has_float_override(self, "hover_scale_x") || ControlMethod.has_float_override(self, "hover_scale_y"):
-			ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+			ret.append({ "name":get_class_static() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
 		else:
-			ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
+			ret.append({ "name":get_class_static() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 		_property_list_add_enum(ret, "hover_scale_pivot")
 	else:
 		var effect = ControlMethod.get_enum(self, "hover_effect")
@@ -532,9 +521,9 @@ func _get_property_list():
 			_property_list_add_color(ret, "hover_mix_color")
 		if effect == EFFECT_SCALE || effect == EFFECT_MIX_SCALE:
 			if ControlMethod.has_float_override(self, "hover_scale_x") || ControlMethod.has_float_override(self, "hover_scale_y"):
-				ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+				ret.append({ "name":get_class_static() + "/hover_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
 			else:
-				ret.append({ "name":get_class() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
+				ret.append({ "name":get_class_static() + "/hover_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 			_property_list_add_enum(ret, "hover_scale_pivot")
 
 	_property_list_add_enum(ret, "pressed_effect")
@@ -542,9 +531,9 @@ func _get_property_list():
 		_property_list_add_float(ret, "pressed_mix")
 		_property_list_add_color(ret, "pressed_mix_color")
 		if ControlMethod.has_float_override(self, "pressed_scale_x") || ControlMethod.has_float_override(self, "pressed_scale_y"):
-			ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+			ret.append({ "name":get_class_static() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
 		else:
-			ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
+			ret.append({ "name":get_class_static() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 		_property_list_add_enum(ret, "pressed_scale_pivot")
 	else:
 		var effect = ControlMethod.get_enum(self, "pressed_effect")
@@ -553,38 +542,38 @@ func _get_property_list():
 			_property_list_add_color(ret, "pressed_mix_color")
 		if effect == EFFECT_SCALE || effect == EFFECT_MIX_SCALE:
 			if ControlMethod.has_float_override(self, "pressed_scale_x") || ControlMethod.has_float_override(self, "pressed_scale_y"):
-				ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
+				ret.append({ "name":get_class_static() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":checkedUsage })
 			else:
-				ret.append({ "name":get_class() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
+				ret.append({ "name":get_class_static() + "/pressed_scale", "type":TYPE_VECTOR2, "usage":uncheckedUsage })
 			_property_list_add_enum(ret, "pressed_scale_pivot")
 	return ret
 
 func _property_list_add_sound(p_list:Array, p_sound:String):
 	if ControlMethod.has_sound_override(self, p_sound):
-		p_list.append({ "name":get_class() + "/" + p_sound, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
+		p_list.append({ "name":get_class_static() + "/" + p_sound, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
 	else:
-		p_list.append({ "name":get_class() + "/" + p_sound, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
+		p_list.append({ "name":get_class_static() + "/" + p_sound, "type":TYPE_OBJECT, "hint":PROPERTY_HINT_RESOURCE_TYPE, "hint_string":"AudioStream", "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
 
 func _property_list_add_float(p_list:Array, p_float:String):
 	if ControlMethod.has_float_override(self, p_float):
-		p_list.append({ "name":get_class() + "/" + p_float, "type":TYPE_REAL, "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
+		p_list.append({ "name":get_class_static() + "/" + p_float, "type":TYPE_REAL, "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
 	else:
-		p_list.append({ "name":get_class() + "/" + p_float, "type":TYPE_REAL, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
+		p_list.append({ "name":get_class_static() + "/" + p_float, "type":TYPE_REAL, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
 
 func _property_list_add_enum(p_list:Array, p_enum:String):
 	var hintString:String = str(ENUM_THEME_OPTION_DICT[ENUM_THEME_PAIRS[p_enum]])
 	hintString = hintString.trim_prefix("[").trim_suffix("]")
 	hintString = " " + hintString
 	if ControlMethod.has_enum_override(self, p_enum):
-		p_list.append({ "name":get_class() + "/" + p_enum, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":hintString,"usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
+		p_list.append({ "name":get_class_static() + "/" + p_enum, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":hintString,"usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
 	else:
-		p_list.append({ "name":get_class() + "/" + p_enum, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":hintString, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
+		p_list.append({ "name":get_class_static() + "/" + p_enum, "type":TYPE_INT, "hint":PROPERTY_HINT_ENUM, "hint_string":hintString, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
 
 func _property_list_add_color(p_list:Array, p_color:String):
 	if has_color_override(p_color):
-		p_list.append({ "name":get_class() + "/" + p_color, "type":TYPE_COLOR, "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
+		p_list.append({ "name":get_class_static() + "/" + p_color, "type":TYPE_COLOR, "usage":PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE | PROPERTY_USAGE_CHECKED })
 	else:
-		p_list.append({ "name":get_class() + "/" + p_color, "type":TYPE_COLOR, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
+		p_list.append({ "name":get_class_static() + "/" + p_color, "type":TYPE_COLOR, "usage":PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_CHECKABLE })
 
 static func _register_default_theme(p_theme:MyTheme):
 	for i in BOOL_THEME_NAMES.keys():
@@ -605,13 +594,13 @@ static func _register_default_theme(p_theme:MyTheme):
 
 func has_color(p_name:String, p_type:String = "") -> bool:
 	if p_type == "" && not has_color_override(p_name) && COLOR_THEME_NAMES.has(p_name):
-		p_type = get_class()
+		p_type = get_class_static()
 	return .has_color(p_name, p_type)
 
 
 func get_color(p_name:String, p_type:String = ""):
 	if p_type == "" && not has_color_override(p_name) && COLOR_THEME_NAMES.has(p_name):
-		p_type = get_class()
+		p_type = get_class_static()
 	return .get_color(p_name, p_type)
 
 
