@@ -386,6 +386,12 @@ func _get(p_property):
 	if splitArray.size() < 2 || splitArray[0] != get_class_static():
 		return null
 	
+	if splitArray[1] == "hover_scale":
+		return Vector2(ControlMethod.get_float(self, "hover_scale_x") if ControlMethod.has_float_override(self, "hover_scale_x") else FLOAT_THEME_NAMES["hover_scale_x"],
+				ControlMethod.get_float(self, "hover_scale_y") if ControlMethod.has_float_override(self, "hover_scale_y") else FLOAT_THEME_NAMES["hover_scale_y"])
+	if splitArray[1] == "pressed_scale":
+		return Vector2(ControlMethod.get_float(self, "pressed_scale_x") if ControlMethod.has_float_override(self, "pressed_scale_x") else FLOAT_THEME_NAMES["pressed_scale_x"],
+				ControlMethod.get_float(self, "pressed_scale_y") if ControlMethod.has_float_override(self, "pressed_scale_y") else FLOAT_THEME_NAMES["pressed_scale_y"])
 	if BOOL_THEME_NAMES.has(splitArray[1]):
 		return ControlMethod.get_bool(self, splitArray[1]) if ControlMethod.has_bool_override(self, splitArray[1]) else BOOL_THEME_NAMES[splitArray[1]]
 	if FLOAT_THEME_NAMES.has(splitArray[1]):
